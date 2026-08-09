@@ -32,6 +32,8 @@ public class Main {
                 return !rented;
             }
             public abstract String displayDetails();
+            public abstract double lateFeePerDay();
+        }
 
         }
     }
