@@ -112,6 +112,88 @@ public class Main {
                 return String.format("Truck [%s] %s - %.1f ton capacity - $%.2f/day", getPlateNumber(), getModel(), capacityTons, DAILY_RATE);
             }
         }
+        class RentalService {
+            private List<Vehicle> fleet = new ArrayList<>();
 
+            public void addVehicle(Vehicle v) {
+                fleet.add(v);
+            }
+
+            public void showFleet() {
+                System.out.println("=== Fleet ===");
+                for (Vehicle v : fleet) {
+                    // POLYMORPHISM: displayDetails() call resolves to the correct subclass method
+                    System.out.println(v.displayDetails() + " | " + (v.isAvailableForRent() ? "Available" : "Rented"));
+                }
+            }
+
+            public void rentVehicle(String plateNumber, int days) {
+                Vehicle v = findVehicle(plateNumber);
+                if (v == null) {
+                    System.out.println("Vehicle not found: " + plateNumber);
+                    return;
+                }
+                if (!v.isAvailableForRent()) {
+                    System.out.println(v.getModel() + " (" + plateNumber + ") is already rented.");
+                    return;
+                }
+                double cost = v.calculateRentalCost(days); // POLYMORPHIC dispatch
+                v.markRented();
+                System.out.printf("Rented %s for %d days. Total cost: $%.2f%n", v.getModel(), days, cost);
+            }
+
+            public void returnVehicle(String plateNumber, int daysLate) {
+                Vehicle v = findVehicle(plateNumber);
+                if (v == null || !v.isRented()) {
+                    System.out.println("Cannot return - vehicle not currently rented: " + plateNumber);
+                    return;
+                }
+                v.markReturned();
+                if (daysLate > 0) {
+                    double fee = daysLate * v.lateFeePerDay(); // POLYMORPHIC dispatch
+                    System.out.printf("Returned %s late by %d days. Late fee: $%.2f%n", v.getModel(), daysLate, fee);
+                } else {
+                    System.out.println("Returned " + v.getModel() + " on time. No late fee.");
+                }
+            }
+
+            private Vehicle findVehicle(String plateNumber) {
+                for (Vehicle v : fleet) {
+                    if (v.getPlateNumber().equals(plateNumber)) return v;
+                }
+                return null;
+            }
         }
+
+        public class VehicleRentalSystem {
+            public static void main(String[] args) {
+                RentalService service = new RentalService();
+
+                service.addVehicle(new Car("CAR-101", "Toyota Corolla", 5));
+                service.addVehicle(new Bike("BIKE-201", "Trek Marlin", "Mountain"));
+                service.addVehicle(new Truck("TRK-301", "Ford F-150", 2.5));
+
+                service.showFleet();
+
+                System.out.println("\n--- Renting Vehicles ---");
+                service.rentVehicle("CAR-101", 8);   // qualifies for weekly discount
+                service.rentVehicle("BIKE-201", 3);
+                service.rentVehicle("TRK-301", 6);   // qualifies for bulk discount
+                service.rentVehicle("CAR-101", 2);   // already rented -> denied
+
+                System.out.println();
+                service.showFleet();
+
+                System.out.println("\n--- Returning Vehicles ---");
+                service.returnVehicle("CAR-101", 2);  // late fee applies
+                service.returnVehicle("BIKE-201", 0); // on time
+                service.returnVehicle("TRK-301", 1);  // late fee applies
+
+                System.out.println();
+                service.showFleet();
+            }
+        }
+
+
+    }
     }
