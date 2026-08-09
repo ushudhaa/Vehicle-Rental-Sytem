@@ -31,6 +31,7 @@ public class Main {
             public boolean isAvailableForRent() {
                 return !rented;
             }
+            public abstract String displayDetails();
 
         }
     }
