@@ -20,6 +20,17 @@ public class Main {
                 this.model = model;
                 this.rented = false;
             }
+            public String getPlateNumber() { return plateNumber; }
+            public String getModel() { return model; }
+            public boolean isRented() { return rented; }
+
+            public void markRented() { this.rented = true; }
+            public void markReturned() { this.rented = false; }
+
+            @Override
+            public boolean isAvailableForRent() {
+                return !rented;
+            }
 
         }
     }
